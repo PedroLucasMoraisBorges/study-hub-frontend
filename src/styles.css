@@ -31,6 +31,16 @@
   --slate: #556273;
   --slate-ink: #2f3945;
   --slate-soft: #e2e6ea;
+  --note-butter: #F7EDC8;
+  --note-butter-ink: #5A4A1E;
+  --note-sage: #DCE8DF;
+  --note-sage-ink: #2F4A3D;
+  --note-peach: #F5DFD3;
+  --note-peach-ink: #6B3A26;
+  --note-lavender: #E4E0F0;
+  --note-lavender-ink: #4A3F6B;
+  --note-mist: #DCE6EE;
+  --note-mist-ink: #2F4A5C;
   --shadow: 0 6px 20px rgba(36, 31, 28, .08);
   --shadow-lg: 0 16px 40px rgba(36, 31, 28, .18);
 }

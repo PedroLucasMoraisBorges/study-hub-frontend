@@ -1,0 +1,47 @@
+:host {
+  display: block;
+}
+
+/* Cabeçalho nunca some: opacidade mínima .5, 1 no hover/foco do card (padrão --btns de topic.component.css). */
+.note {
+  --head: 0.5;
+}
+.note:hover,
+.note:focus-within {
+  --head: 1;
+}
+.note-head {
+  opacity: var(--head);
+}
+
+.note-dot {
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(36, 31, 28, 0.25);
+}
+
+.note-dot-active {
+  outline: 2px solid var(--ink);
+}
+
+.note-trash {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+.note-dot:focus-visible,
+.note-trash:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 4px;
+}

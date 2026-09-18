@@ -25,6 +25,51 @@
     </div>
   </div>
 
+  @if (activeTab() === 'notes') {
+    <div style="flex:1;overflow:auto;padding:20px 28px 40px;display:flex;flex-direction:column;gap:28px;align-items:flex-start">
+      <button type="button" (click)="addLooseNote()" style="padding:8px 14px;border-radius:10px;border:1.5px dashed var(--divider);background:transparent;font:700 13px 'Archivo';color:var(--ink);opacity:.75">+ Nova nota</button>
+
+      @if (notes().length === 0) {
+        <div style="font-size:14px;opacity:.55">Nenhuma nota ainda. Adicione uma em um documento ou clique em “+ Nova nota”.</div>
+      }
+
+      @for (group of noteGroups(); track group.doc.id) {
+        <section style="width:100%">
+          <button type="button" (click)="openNoteDoc(group.doc)" title="Abrir documento" style="border:none;background:none;padding:0;margin-bottom:16px;font:800 16px 'Archivo';color:var(--ink);text-decoration:underline;text-align:left">{{ group.doc.name }}</button>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px;align-items:start;padding:6px 8px">
+            @for (note of group.notes; track note.id; let i = $index) {
+              <app-note-card
+                [note]="note"
+                [index]="i"
+                variant="board"
+                (textChange)="notesSync.changeText(note.id, $event)"
+                (colorChange)="notesSync.changeColor(note.id, $event)"
+                (remove)="notesSync.remove(note.id)"
+              />
+            }
+          </div>
+        </section>
+      }
+
+      @if (looseNotes().length > 0) {
+        <section style="width:100%">
+          <h2 style="margin:0 0 16px;font-weight:800;font-size:16px">Notas avulsas</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px;align-items:start;padding:6px 8px">
+            @for (note of looseNotes(); track note.id; let i = $index) {
+              <app-note-card
+                [note]="note"
+                [index]="i"
+                variant="board"
+                (textChange)="notesSync.changeText(note.id, $event)"
+                (colorChange)="notesSync.changeColor(note.id, $event)"
+                (remove)="notesSync.remove(note.id)"
+              />
+            }
+          </div>
+        </section>
+      }
+    </div>
+  } @else {
   <div style="flex:1;overflow:auto;padding:20px 28px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-content:start">
     @for (f of fileVms(); track f.file.id) {
       <div (click)="openFile(f)" class="file-card" [style]="'background:' + f.cardBg + ';border-radius:16px;padding:14px;box-shadow:' + f.cardShadow + ';display:flex;flex-direction:column;gap:6px;cursor:pointer;position:relative'">
@@ -66,6 +111,7 @@
       }
     </div>
   </div>
+  }
 
   @if (deletingFile(); as file) {
     <app-confirm-dialog

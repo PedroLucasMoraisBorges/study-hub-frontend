@@ -1,0 +1,58 @@
+<div
+  class="note"
+  [style.background]="palette().bg"
+  [style.color]="palette().ink"
+  [style.transform]="transform()"
+  style="position:relative;border-radius:6px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.04);padding:12px 14px"
+>
+  <div class="note-head" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;min-height:18px">
+    <span style="font-size:11px">{{ dateLabel() }}</span>
+    @if (editable()) {
+      <div style="display:flex;align-items:center;gap:4px">
+        @for (c of colors; track c.slug) {
+          <button
+            type="button"
+            class="note-dot"
+            [attr.aria-label]="'Cor ' + c.label"
+            [attr.aria-pressed]="note().color === c.slug"
+            [class.note-dot-active]="note().color === c.slug"
+            [style.background]="c.bg"
+            (click)="colorChange.emit(c.slug)"
+          ></button>
+        }
+        <button type="button" class="note-trash" aria-label="Excluir nota" (click)="askDelete()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (editable()) {
+    <textarea
+      #textarea
+      [appAutoresize]="48"
+      [value]="note().text ?? ''"
+      (input)="textChange.emit($any($event.target).value)"
+      aria-label="Texto da nota"
+      placeholder="Escreva uma nota…"
+      style="display:block;width:100%;min-height:48px;padding:0;border:none;background:transparent;color:inherit;font-size:14px;line-height:1.5;resize:none;overflow:hidden"
+    ></textarea>
+  } @else {
+    <div style="font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere">{{ note().text }}</div>
+  }
+
+  @if (confirmingDelete()) {
+    <div
+      role="group"
+      aria-label="Confirmar exclusão"
+      (keydown.escape)="cancelDelete($event)"
+      style="position:absolute;inset:0;border-radius:6px;background:rgba(255,255,255,.92);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px"
+    >
+      <div style="font-weight:800;font-size:13px">Excluir esta nota?</div>
+      <div style="display:flex;gap:8px">
+        <button #cancelButton type="button" (click)="cancelDelete()" style="padding:5px 12px;border-radius:8px;border:1.5px solid var(--divider);background:#fff;font:800 12px 'Archivo'">Cancelar</button>
+        <button type="button" (click)="confirmDelete()" style="padding:5px 12px;border-radius:8px;border:none;background:var(--rose);color:#fff;font:800 12px 'Archivo'">Excluir</button>
+      </div>
+    </div>
+  }
+</div>

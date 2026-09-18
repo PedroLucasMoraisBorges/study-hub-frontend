@@ -6,4 +6,5 @@ export * from './document-block.model';
 export * from './flashcard.model';
 export * from './slide.model';
 export * from './mindmap-node.model';
+export * from './note.model';
 export * from './api-error.model';

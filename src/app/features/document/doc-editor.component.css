@@ -11,6 +11,23 @@ textarea:focus {
   border-color: var(--accent);
 }
 
+/* Painel de notas: empurra o conteúdo; em telas estreitas sobrepõe em vez de espremer o editor. */
+@media (max-width: 1024px) {
+  .notes-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    box-shadow: -4px 0 14px rgba(0, 0, 0, 0.12);
+    z-index: 15;
+  }
+}
+
+/* Fechado (inert, largura 0): sem sombra vazando na borda. */
+.notes-panel[inert] {
+  box-shadow: none;
+}
+
 .rich-toolbar-btn {
   width: 24px;
   height: 24px;

@@ -1,19 +1,34 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostListener,
+  Injector,
+  afterNextRender,
+  computed,
+  inject,
+  signal,
+  viewChild,
+  viewChildren,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgTemplateOutlet } from '@angular/common';
 import { firstValueFrom, map } from 'rxjs';
 import { FilesService } from '../../shared/services/files.service';
 import { DocumentBlocksService } from '../../shared/services/document-blocks.service';
+import { NotesService } from '../../shared/services/notes.service';
 import { TopicsStore } from '../../shared/services/topics-store.service';
 import { TOPIC_COLORS } from '../../shared/constants/topic-colors.constant';
 import { Autosaver } from '../../shared/utils/autosave.util';
+import { NotesSync } from '../../shared/utils/notes-sync';
 import { RichMarker, wrapSelectionWithMarker } from '../../shared/utils/rich-text.util';
 import { AutoresizeDirective } from '../../shared/directives/autoresize.directive';
 import { ImageSlotComponent } from '../../shared/components/image-slot/image-slot.component';
+import { NoteCardComponent } from '../../shared/components/note-card/note-card.component';
 import { RichTextPipe } from '../../shared/pipes/rich-text.pipe';
 import { CodeHighlightPipe } from '../../shared/pipes/code-highlight.pipe';
-import { DocumentBlock, DocumentBlockType } from '../../shared/models';
+import { DocumentBlock, DocumentBlockType, Note } from '../../shared/models';
 
 type ViewMode = 'edit' | 'preview';
 
@@ -34,7 +49,14 @@ const BLOCK_TYPE_LABELS: { type: DocumentBlockType; label: string }[] = [
 @Component({
   selector: 'app-doc-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgTemplateOutlet, AutoresizeDirective, ImageSlotComponent, RichTextPipe, CodeHighlightPipe],
+  imports: [
+    NgTemplateOutlet,
+    AutoresizeDirective,
+    ImageSlotComponent,
+    NoteCardComponent,
+    RichTextPipe,
+    CodeHighlightPipe,
+  ],
   templateUrl: './doc-editor.component.html',
   styleUrl: './doc-editor.component.css',
 })
@@ -43,7 +65,9 @@ export class DocEditorComponent {
   private readonly router = inject(Router);
   private readonly filesApi = inject(FilesService);
   private readonly blocksApi = inject(DocumentBlocksService);
+  private readonly notesApi = inject(NotesService);
   private readonly topicsStore = inject(TopicsStore);
+  private readonly injector = inject(Injector);
 
   protected readonly blockTypes = BLOCK_TYPE_LABELS;
 
@@ -58,6 +82,10 @@ export class DocEditorComponent {
   protected readonly topicSoft = computed(() => {
     const t = this.topic();
     return t ? TOPIC_COLORS[t.color.slug].soft : '#eee';
+  });
+  protected readonly topicInk = computed(() => {
+    const t = this.topic();
+    return t ? TOPIC_COLORS[t.color.slug].ink : 'var(--ink)';
   });
 
   protected readonly fileName = signal('');
@@ -77,6 +105,14 @@ export class DocEditorComponent {
   protected readonly saveStatus = this.autosaver.status;
   private fileDirty = false;
   private readonly blockPatches = new Map<number, Partial<DocumentBlock>>();
+
+  protected readonly notes = signal<Note[]>([]);
+  protected readonly notesPanelOpen = signal(false);
+  protected readonly notesSync = new NotesSync(this.notes, this.notesApi, () =>
+    this.autosaver.schedule(() => this.flush()),
+  );
+  private readonly notesToggle = viewChild<ElementRef<HTMLButtonElement>>('notesToggle');
+  private readonly noteCards = viewChildren(NoteCardComponent);
 
   protected readonly blockVms = computed(() =>
     this.blocks().map((b) => ({
@@ -106,6 +142,8 @@ export class DocEditorComponent {
     this.fileDescription.set(detail.file.description ?? '');
     this.blocks.set(detail.blocks ?? []);
     this.loaded.set(true);
+    // Notas carregam à parte: não devem atrasar nem impedir a abertura do documento.
+    this.notes.set(await firstValueFrom(this.notesApi.listByFile(this.fileId())));
   }
 
   backToTopic(): void {
@@ -114,6 +152,31 @@ export class DocEditorComponent {
 
   toggleViewMode(): void {
     this.viewMode.update((m) => (m === 'edit' ? 'preview' : 'edit'));
+  }
+
+  toggleNotesPanel(): void {
+    this.notesPanelOpen.update((open) => !open);
+  }
+
+  // Listener no document: o host é `display: contents` e o foco pode estar fora do componente.
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (!this.notesPanelOpen()) return;
+    this.notesPanelOpen.set(false);
+    // O painel fechado fica `inert`; devolve o foco ao botão para não cair no <body>.
+    this.notesToggle()?.nativeElement.focus();
+  }
+
+  async addNote(): Promise<void> {
+    await this.notesSync.create(this.topicId(), this.fileId());
+    // A nota nova é sempre a última da lista (ordem cronológica); espera o render para focar o textarea.
+    afterNextRender(
+      () => {
+        const cards = this.noteCards();
+        cards[cards.length - 1]?.focus();
+      },
+      { injector: this.injector },
+    );
   }
 
   onTitleChange(value: string): void {
@@ -142,6 +205,7 @@ export class DocEditorComponent {
       tasks.push(firstValueFrom(this.blocksApi.update(this.fileId(), blockId, patch)));
     }
     this.blockPatches.clear();
+    tasks.push(this.notesSync.flush());
     await Promise.all(tasks);
   }
 
