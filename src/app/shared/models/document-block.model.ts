@@ -7,7 +7,9 @@ export type DocumentBlockType =
   | 'link'
   | 'image'
   | 'file'
-  | 'hr';
+  | 'hr'
+  | 'code'
+  | 'quote';
 
 export interface DocumentBlock {
   id: number;
@@ -18,6 +20,7 @@ export interface DocumentBlock {
   imageFile: string | null;
   documentFile: string | null;
   documentFileName: string | null;
+  language: string | null;
 }
 
 export interface CreateDocumentBlockRequest {
@@ -31,4 +34,5 @@ export interface UpdateDocumentBlockRequest {
   imageFile?: string | null;
   documentFile?: string | null;
   documentFileName?: string | null;
+  language?: string | null;
 }

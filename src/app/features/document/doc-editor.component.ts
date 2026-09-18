@@ -12,6 +12,7 @@ import { RichMarker, wrapSelectionWithMarker } from '../../shared/utils/rich-tex
 import { AutoresizeDirective } from '../../shared/directives/autoresize.directive';
 import { ImageSlotComponent } from '../../shared/components/image-slot/image-slot.component';
 import { RichTextPipe } from '../../shared/pipes/rich-text.pipe';
+import { CodeHighlightPipe } from '../../shared/pipes/code-highlight.pipe';
 import { DocumentBlock, DocumentBlockType } from '../../shared/models';
 
 type ViewMode = 'edit' | 'preview';
@@ -25,13 +26,15 @@ const BLOCK_TYPE_LABELS: { type: DocumentBlockType; label: string }[] = [
   { type: 'link', label: 'Link' },
   { type: 'image', label: 'Imagem' },
   { type: 'file', label: 'Anexo' },
+  { type: 'code', label: 'Código' },
+  { type: 'quote', label: 'Citação' },
   { type: 'hr', label: 'Linha horizontal' },
 ];
 
 @Component({
   selector: 'app-doc-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgTemplateOutlet, AutoresizeDirective, ImageSlotComponent, RichTextPipe],
+  imports: [NgTemplateOutlet, AutoresizeDirective, ImageSlotComponent, RichTextPipe, CodeHighlightPipe],
   templateUrl: './doc-editor.component.html',
   styleUrl: './doc-editor.component.css',
 })
@@ -87,6 +90,8 @@ export class DocEditorComponent {
       isImage: b.type === 'image',
       isFile: b.type === 'file',
       isHr: b.type === 'hr',
+      isCode: b.type === 'code',
+      isQuote: b.type === 'quote',
     })),
   );
 
@@ -154,6 +159,26 @@ export class DocEditorComponent {
     this.patchBlockLocal(block.id, { linkUrl: value });
     this.blockPatches.set(block.id, { ...this.blockPatches.get(block.id), linkUrl: value });
     this.autosaver.schedule(() => this.flush());
+  }
+
+  onBlockLanguageChange(block: DocumentBlock, value: string): void {
+    this.patchBlockLocal(block.id, { language: value });
+    this.blockPatches.set(block.id, { ...this.blockPatches.get(block.id), language: value });
+    this.autosaver.schedule(() => this.flush());
+  }
+
+  onCodeKeyDown(event: KeyboardEvent): void {
+    if (event.key !== 'Tab') return;
+    event.preventDefault();
+    const el = event.target as HTMLTextAreaElement;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const next = el.value.slice(0, start) + '  ' + el.value.slice(end);
+    // Atribui direto ao DOM e dispara `input`: o AutoresizeDirective só recalcula a altura nesse evento
+    // e o handler (input) já propaga o valor para onBlockTextChange.
+    el.value = next;
+    el.selectionStart = el.selectionEnd = start + 2;
+    el.dispatchEvent(new Event('input'));
   }
 
   async onImageChange(block: DocumentBlock, dataUrl: string | null): Promise<void> {
