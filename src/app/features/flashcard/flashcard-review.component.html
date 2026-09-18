@@ -1,0 +1,42 @@
+@if (loaded()) {
+  <div style="flex:none;padding:14px 28px;border-bottom:1.5px solid var(--divider);background:#fbf9f4">
+    <div style="display:flex;align-items:center">
+      <div style="font-weight:800;margin-right:auto">{{ fileName() }}</div>
+      <div style="flex:1;max-width:320px;height:5px;border-radius:3px;background:var(--accent-soft);margin:0 24px"><div [style.width.%]="cardsProgress()" style="height:100%;border-radius:3px;background:var(--accent)"></div></div>
+      <div style="font-size:12px;opacity:.5;margin-right:18px">{{ cardsPositionLabel() }}</div>
+      <button (click)="backToCardsManage()" style="width:34px;height:34px;border-radius:9px;border:1.5px solid var(--divider);background:#fff;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+
+  @if (cardsDone()) {
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px">
+      <div style="font-weight:800;font-size:24px">Deck concluído 🎉</div>
+      <div style="opacity:.6;font-size:14px">Relatório da revisão de "{{ fileName() }}"</div>
+      <div style="display:flex;gap:12px">
+        @for (st of reportStats(); track st.label) {
+          <div [style]="'width:100px;padding:14px 10px;border-radius:12px;background:' + st.bg + ';text-align:center'">
+            <div [style.color]="st.color" style="font-size:24px;font-weight:800">{{ st.count }}</div>
+            <div style="font-size:12px;opacity:.7;margin-top:2px">{{ st.label }}</div>
+          </div>
+        }
+      </div>
+      <div style="display:flex;gap:10px">
+        <button (click)="backToCardsManage()" style="padding:10px 20px;border-radius:12px;border:1.5px solid var(--divider);background:#fff;font:800 14px 'Archivo'">Ver cartas</button>
+        <button (click)="restartDeck()" style="padding:10px 20px;border-radius:12px;border:none;background:var(--accent);color:#fff;font:800 14px 'Archivo'">Revisar novamente</button>
+      </div>
+    </div>
+  } @else {
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative">
+      <div (click)="flipCard()" style="width:440px;height:260px;border-radius:22px;background:#fff;box-shadow:var(--shadow-lg);display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer">
+        <div style="font-weight:800;font-size:24px">{{ cardFaceText() }}</div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:12px;opacity:.4;margin-bottom:20px">toque na carta para virar</div>
+    <div style="display:flex;justify-content:center;gap:12px;padding-bottom:28px">
+      <button (click)="rateAgain()" style="width:130px;height:54px;border-radius:14px;border:1.5px solid var(--rose);color:var(--rose);background:var(--rose-soft);font-weight:800">Again</button>
+      <button (click)="rateHard()" style="width:130px;height:54px;border-radius:14px;border:1.5px solid var(--amber);color:var(--amber-ink);background:var(--amber-soft);font-weight:800">Hard</button>
+      <button (click)="rateGood()" style="width:130px;height:54px;border-radius:14px;border:1.5px solid var(--accent);color:#fff;background:var(--accent);font-weight:800">Good</button>
+      <button (click)="rateEasy()" style="width:130px;height:54px;border-radius:14px;border:1.5px solid var(--blue);color:var(--blue-ink);background:var(--blue-soft);font-weight:800">Easy</button>
+    </div>
+  }
+}

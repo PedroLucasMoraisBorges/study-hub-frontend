@@ -1,0 +1,65 @@
+@if (loaded()) {
+  <div style="padding:24px 28px 0;flex:none">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <button (click)="backToTopic()" style="width:34px;height:34px;flex:none;border-radius:9px;border:1.5px solid var(--divider);background:#fff;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <input [value]="fileName()" (input)="onTitleChange($any($event.target).value)" placeholder="Nome do deck" style="flex:1;min-width:0;font-weight:800;font-size:26px;border:1.5px solid var(--divider);background:#fff;padding:8px 12px;border-radius:10px;color:var(--ink)" />
+    </div>
+    <input [value]="fileDescription()" (input)="onDescriptionChange($any($event.target).value)" placeholder="Descrição curta (aparece no card do tópico)" style="font-size:14px;margin-bottom:16px;border:1.5px solid var(--divider);background:#fff;width:100%;padding:8px 12px;border-radius:10px;color:var(--ink);opacity:.85" />
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:12px;opacity:.5">{{ cardCount() }} carta(s)</div>
+      <button (click)="startReview()" [disabled]="noCards()" [style.opacity]="noCards() ? 0.4 : 1" style="padding:9px 18px;border-radius:10px;border:none;background:var(--amber);color:#fff;font:800 13px 'Archivo'">Iniciar revisão</button>
+    </div>
+  </div>
+  <div style="flex:1;overflow:auto;padding:0 28px 28px">
+    @if (noCards()) {
+      <div style="padding:40px 20px;text-align:center;border:2px dashed var(--divider);border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:10px">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="opacity:.4"><rect x="3" y="5" width="14" height="10" rx="2"/><path d="M7 15v2M13 15v2M5 19h10"/></svg>
+        <div style="font-size:13px;opacity:.6">Nenhuma carta ainda</div>
+        <button (click)="openNewCardForm()" style="padding:9px 16px;background:var(--amber);color:#fff;border:none;border-radius:10px;font:800 13px 'Archivo'">+ Adicionar carta</button>
+      </div>
+    } @else {
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        @for (c of cards(); track c.id) {
+          <div class="card-tile" style="background:var(--amber-soft);border-radius:12px;padding:12px;position:relative;min-height:70px">
+            <div style="font-size:13px;color:var(--amber-ink);padding-right:44px">{{ c.front }}</div>
+            <div style="display:flex;gap:4px;position:absolute;top:8px;right:8px;opacity:var(--btns,0)">
+              <button (click)="openEditCardForm(c)" style="width:20px;height:20px;border:none;background:#fff;border-radius:5px;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--amber-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+              <button (click)="startDeleteCard(c)" style="width:20px;height:20px;border:none;background:#fff;border-radius:5px;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--amber-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+            </div>
+          </div>
+        }
+        <div (click)="openNewCardForm()" style="border:2px dashed var(--divider);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;opacity:.4;cursor:pointer;min-height:70px">+ Adicionar carta</div>
+      </div>
+    }
+  </div>
+
+  @if (cardFormOpen()) {
+    <div style="position:fixed;inset:0;background:rgba(36,31,28,.5);display:flex;align-items:center;justify-content:center;z-index:100">
+      <div style="width:340px;background:#fff;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow-lg)">
+        <div style="font-weight:800;font-size:18px">{{ cardFormTitle() }}</div>
+        <div>
+          <label style="display:block;font-size:12px;opacity:.6;margin-bottom:5px">Frente</label>
+          <textarea [appAutoresize]="60" [value]="cardFrontDraft()" (input)="onCardFrontChange($any($event.target).value)" style="width:100%;min-height:60px;padding:8px 12px;border-radius:9px;border:1.5px solid var(--divider);background:#fbf9f5;font:13px 'Archivo';overflow:hidden;resize:none"></textarea>
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;opacity:.6;margin-bottom:5px">Verso</label>
+          <textarea [appAutoresize]="60" [value]="cardBackDraft()" (input)="onCardBackChange($any($event.target).value)" style="width:100%;min-height:60px;padding:8px 12px;border-radius:9px;border:1.5px solid var(--divider);background:#fbf9f5;font:13px 'Archivo';overflow:hidden;resize:none"></textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button (click)="closeCardForm()" style="padding:8px 14px;border-radius:9px;border:1.5px solid var(--divider);background:#fff;font:800 13px 'Archivo'">Cancelar</button>
+          <button (click)="saveCard()" style="padding:8px 14px;border-radius:9px;border:none;background:var(--amber);color:#fff;font:800 13px 'Archivo'">Salvar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (deletingCard(); as card) {
+    <app-confirm-dialog
+      title="Excluir esta carta?"
+      description='"{{ card.front }}" será removida do deck imediatamente.'
+      confirmLabel="Excluir"
+      (cancel)="cancelDeleteCard()"
+      (confirm)="confirmDeleteCard()"
+    />
+  }
+}

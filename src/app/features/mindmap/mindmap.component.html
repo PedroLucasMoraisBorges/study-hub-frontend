@@ -1,0 +1,111 @@
+@if (loaded()) {
+  <div style="flex:none;padding:12px 22px;border-bottom:1.5px solid var(--divider);background:#fbf9f4">
+    <div style="display:flex;align-items:center">
+      <div style="display:flex;align-items:baseline;gap:6px;margin-right:auto;min-width:0">
+        <span (click)="backToTopic()" style="cursor:pointer;text-decoration:underline;font-size:13px;opacity:.55;flex:none">{{ topic()?.name }}</span>
+        <span style="opacity:.4;font-size:13px;flex:none">/</span>
+        <input [value]="fileName()" (input)="onTitleChange($any($event.target).value)" placeholder="Nome do mapa" style="border:none;background:none;font-weight:800;color:var(--ink);font-size:14px;padding:2px 4px;min-width:0;width:200px" />
+      </div>
+      <button (click)="addChildNode()" style="width:34px;height:34px;flex:none;border-radius:9px;border:1.5px solid var(--divider);background:#fff;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      <button (click)="toggleMindmapFullscreen()" style="width:34px;height:34px;flex:none;margin-left:8px;border-radius:9px;border:1.5px solid var(--divider);background:#fff;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+      <div style="display:flex;align-items:center;gap:6px;margin-left:10px;flex:none">
+        <button (click)="zoomOut()" style="width:28px;height:28px;border-radius:8px;border:1.5px solid var(--divider);background:#fff;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <button (click)="zoomReset()" style="font-size:11px;opacity:.6;min-width:36px;text-align:center;border:none;background:none">{{ zoomLabel() }}</button>
+        <button (click)="zoomIn()" style="width:28px;height:28px;border-radius:8px;border:1.5px solid var(--divider);background:#fff;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      </div>
+    </div>
+    <input [value]="fileDescription()" (input)="onDescriptionChange($any($event.target).value)" placeholder="Descrição curta (aparece no card do tópico)" style="margin-top:8px;font-size:12px;border:1.5px solid var(--divider);background:#fff;width:100%;padding:6px 10px;border-radius:8px;color:var(--ink);opacity:.8" />
+  </div>
+
+  <div style="flex:1;display:flex;overflow:hidden">
+    <div #canvas class="mm-canvas" (mousedown)="startPan($event)" [style.cursor]="panning() ? 'grabbing' : 'grab'">
+      <div [style]="'position:absolute;inset:0;transform:translate(' + pan().x + 'px,' + pan().y + 'px) scale(' + zoom() + ');transform-origin:0 0;pointer-events:none'">
+        <svg width="3000" height="3000" style="position:absolute;top:-1000px;left:-1000px;pointer-events:none">
+          @for (ln of mmLines(); track $index) {
+            <path [attr.d]="ln.d" stroke="var(--ink)" stroke-width="2" fill="none" opacity=".55" transform="translate(1000,1000)" />
+          }
+        </svg>
+        @for (n of nodeVms(); track n.id) {
+          <div class="mm-node-wrap" [style.left.px]="n.x" [style.top.px]="n.y" [style.width.px]="n.w" [style.height.px]="n.h">
+            <div
+              (mousedown)="startDrag(n.id, $event)"
+              [style]="
+                'position:absolute;inset:0;border-radius:' + n.radius + ';clip-path:' + n.clip + ';background:' + n.bg + ';color:' + n.color + ';border:' + n.border + ';display:flex;align-items:center;justify-content:center;font-weight:800;font-size:' + n.fontSize + 'px;box-shadow:' + n.shadow + ';cursor:grab;outline:' + n.outline + ';outline-offset:3px;user-select:none;pointer-events:auto;overflow:hidden;padding:16px;text-align:center;word-break:break-word'
+              "
+            >
+              <span style="max-width:100%">{{ n.label }}</span>
+            </div>
+            <button (mousedown)="addChildFrom(n.id, $event)" class="mm-node-btn" style="position:absolute;right:-10px;bottom:-10px;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--divider);background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center;opacity:var(--btns,0);cursor:pointer;z-index:5"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+            <button (mousedown)="deleteNodeDirect(n.id, $event)" class="mm-node-btn" [style]="'position:absolute;left:-10px;bottom:-10px;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--divider);background:#fff;color:var(--rose);display:' + n.deleteDisplay + ';align-items:center;justify-content:center;opacity:var(--btns,0);cursor:pointer;z-index:5'"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (selectedNode(); as sel) {
+      <div style="width:230px;flex:none;border-left:1.5px solid var(--divider);background:#fff;padding:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;overflow-x:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:10px;letter-spacing:.1em;opacity:.4">NÓ SELECIONADO</div>
+          <button (click)="clearSelectedNode()" style="width:20px;height:20px;border:none;background:none;display:flex;align-items:center;justify-content:center;opacity:.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <textarea [appAutoresize]="40" [value]="sel.label" (input)="onSelectedLabelChange($any($event.target).value)" style="padding:8px 10px;border-radius:9px;border:1.5px solid var(--divider);font:800 14px 'Archivo';min-height:40px;overflow:hidden;resize:none"></textarea>
+
+        <div style="font-size:10px;letter-spacing:.1em;opacity:.4;margin-top:4px">TAMANHO DA FONTE</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+          @for (fs of fontSizeOptions; track fs.key) {
+            <button (click)="pickSelectedFontSize(fs.key)" [style]="'padding:6px 2px;border-radius:8px;border:1.5px solid var(--divider);background:' + (sel.fontSize === fs.key ? 'var(--accent)' : '#fff') + ';color:' + (sel.fontSize === fs.key ? '#fff' : 'var(--ink)') + ';font:700 11px \'Archivo\''">{{ fs.label }}</button>
+          }
+        </div>
+        <textarea [appAutoresize]="40" [value]="sel.description" (input)="onSelectedDescriptionChange($any($event.target).value)" placeholder="Descrição (visível só aqui)" style="padding:8px 10px;border-radius:9px;border:1.5px solid var(--divider);font:12px 'Archivo';min-height:40px;overflow:hidden;resize:none"></textarea>
+
+        <div style="font-size:10px;letter-spacing:.1em;opacity:.4;margin-top:4px">TAMANHO</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;opacity:.6;width:32px">Larg.</span>
+          <button (click)="resizeSelectedNode('w', -20)" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--divider);background:#fff">−</button>
+          <span style="font-size:11px;flex:1;text-align:center">{{ sel.w }}px</span>
+          <button (click)="resizeSelectedNode('w', 20)" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--divider);background:#fff">+</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;opacity:.6;width:32px">Alt.</span>
+          <button (click)="resizeSelectedNode('h', -20)" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--divider);background:#fff">−</button>
+          <span style="font-size:11px;flex:1;text-align:center">{{ sel.h }}px</span>
+          <button (click)="resizeSelectedNode('h', 20)" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--divider);background:#fff">+</button>
+        </div>
+
+        <div style="font-size:10px;letter-spacing:.1em;opacity:.4;margin-top:4px">FORMATO</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          @for (sh of shapeOptions; track sh.key) {
+            <button (click)="pickSelectedShape(sh.key)" [style]="'padding:6px;border-radius:8px;border:1.5px solid var(--divider);background:' + (sel.shape === sh.key ? 'var(--accent)' : '#fff') + ';color:' + (sel.shape === sh.key ? '#fff' : 'var(--ink)') + ';font:700 11px \'Archivo\''">{{ sh.label }}</button>
+          }
+        </div>
+
+        <div style="font-size:10px;letter-spacing:.1em;opacity:.4;margin-top:4px">COR DE FUNDO</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div
+            (click)="pickSelectedColor(null)"
+            title="Nenhuma"
+            [style]="'width:20px;height:20px;flex:none;border-radius:50%;background:#fff;border:1.5px dashed var(--divider);outline:' + (!sel.color ? '2px solid var(--ink)' : 'none') + ';outline-offset:2px;cursor:pointer'"
+          ></div>
+          <app-color-swatch-row style="flex:1" [selected]="$any(sel.color ? sel.color.slug : null)" [size]="20" (colorSelected)="pickSelectedColor($event)" />
+        </div>
+
+        <div style="font-size:10px;letter-spacing:.1em;opacity:.4;margin-top:4px">BORDA</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          @for (bs of borderStyleOptions; track bs.key) {
+            <button (click)="pickSelectedBorderStyle(bs.key)" [style]="'padding:6px;border-radius:8px;border:1.5px solid var(--divider);background:' + (sel.borderStyle === bs.key ? 'var(--accent)' : '#fff') + ';color:' + (sel.borderStyle === bs.key ? '#fff' : 'var(--ink)') + ';font:700 11px \'Archivo\''">{{ bs.label }}</button>
+          }
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div
+            (click)="pickSelectedBorderColor(null)"
+            title="Nenhuma"
+            [style]="'width:20px;height:20px;flex:none;border-radius:50%;background:#fff;border:1.5px dashed var(--divider);outline:' + (!sel.borderColor ? '2px solid var(--ink)' : 'none') + ';outline-offset:2px;cursor:pointer'"
+          ></div>
+          <app-color-swatch-row style="flex:1" [selected]="$any(sel.borderColor ? sel.borderColor.slug : null)" [size]="20" (colorSelected)="pickSelectedBorderColor($event)" />
+        </div>
+
+        <button (click)="deleteSelectedNode()" style="padding:8px;border-radius:9px;border:1.5px solid var(--divider);background:#fff;font:700 13px 'Archivo';margin-top:6px">Excluir nó</button>
+      </div>
+    }
+  </div>
+}

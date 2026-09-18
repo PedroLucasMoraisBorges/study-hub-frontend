@@ -1,0 +1,15 @@
+:host {
+  display: contents;
+}
+
+.card-tile {
+  --btns: 0;
+}
+.card-tile:hover {
+  --btns: 1;
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--accent);
+}

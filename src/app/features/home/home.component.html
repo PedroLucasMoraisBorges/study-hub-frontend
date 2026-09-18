@@ -1,0 +1,35 @@
+<div style="height:64px;flex:none;border-bottom:1.5px solid var(--divider);display:flex;align-items:center;justify-content:space-between;padding:0 28px">
+  <div style="font-weight:800;font-size:19px">Atividade recente</div>
+</div>
+<div style="flex:1;overflow:auto;padding:22px 28px;display:flex;flex-direction:column;gap:14px">
+  <div style="font-size:10px;letter-spacing:.1em;opacity:.4">RECÉM ATUALIZADOS</div>
+  @for (f of recentFiles(); track f.file.id) {
+    <div (click)="openFile(f)" class="recent-file-card" style="display:flex;gap:16px;padding:16px;border-radius:16px;background:#fff;box-shadow:var(--shadow);cursor:pointer;position:relative">
+      <div [style]="'width:60px;height:60px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;background:' + f.soft">
+        <svg width="24" height="24" viewBox="0 0 24 24" [style.stroke]="f.ink" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" [innerHTML]="f.iconSvg"></svg>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <div style="font-weight:800;font-size:18px;padding-right:60px">{{ f.file.name }}</div>
+          <span [style]="'font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:' + f.soft + ';color:' + f.ink">{{ f.topicName }}</span>
+        </div>
+        <div style="font-size:12px;opacity:.45;margin-bottom:8px">{{ f.file.updatedAt | timeAgo }}</div>
+        <div style="font-size:13px;opacity:.7">{{ f.file.description || 'Sem descrição' }}</div>
+      </div>
+      <div style="position:absolute;top:14px;right:14px;display:flex;gap:4px;opacity:var(--btns,0)">
+        @if (f.isDoc) {
+          <button (click)="editFile(f, $event)" title="Editar" style="width:24px;height:24px;border:none;background:#fff;border-radius:6px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" [style.stroke]="f.ink" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+          <button (click)="viewDoc(f, $event)" title="Visualizar" style="width:24px;height:24px;border:none;background:#fff;border-radius:6px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" [style.stroke]="f.ink" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        }
+        @if (f.isCards) {
+          <button (click)="editFile(f, $event)" title="Editar" style="width:24px;height:24px;border:none;background:#fff;border-radius:6px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" [style.stroke]="f.ink" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+          <button (click)="reviewCards(f, $event)" title="Revisar" style="width:24px;height:24px;border:none;background:#fff;border-radius:6px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" [attr.fill]="f.ink" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+        }
+        @if (f.isSlides) {
+          <button (click)="editFile(f, $event)" title="Editar" style="width:24px;height:24px;border:none;background:#fff;border-radius:6px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" [style.stroke]="f.ink" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+          <button (click)="presentSlides(f, $event)" title="Apresentar" style="width:24px;height:24px;border:none;background:#fff;border-radius:6px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" [attr.fill]="f.ink" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+        }
+      </div>
+    </div>
+  }
+</div>

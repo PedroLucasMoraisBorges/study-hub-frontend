@@ -1,0 +1,35 @@
+:host {
+  display: contents;
+}
+
+.header-input:focus {
+  border-color: var(--accent);
+}
+
+.slide-card {
+  --btns: 0;
+}
+.slide-card:hover {
+  --btns: 1;
+}
+
+.bg-thumb {
+  --bgctl: 0;
+}
+.bg-thumb:hover {
+  --bgctl: 1;
+}
+
+.title-ctl-wrap {
+  --tctl: 0;
+}
+.title-ctl-wrap:hover {
+  --tctl: 1;
+}
+
+.column-ctl-wrap {
+  --cctl: 0;
+}
+.column-ctl-wrap:hover {
+  --cctl: 1;
+}

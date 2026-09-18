@@ -1,0 +1,11 @@
+:host {
+  display: contents;
+}
+
+.recent-file-card {
+  --btns: 0;
+}
+
+.recent-file-card:hover {
+  --btns: 1;
+}

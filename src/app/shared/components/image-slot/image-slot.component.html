@@ -1,0 +1,25 @@
+<div
+  class="image-slot"
+  [class.has-image]="value()"
+  [class.image-slot--dragover]="dragOver()"
+  (click)="!value() && pick()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave()"
+  (drop)="onDrop($event)"
+>
+  @if (value()) {
+    <div class="image-slot__preview" [style.background-image]="'url(\'' + value() + '\')'"></div>
+    @if (!readonlyMode()) {
+      <div class="image-slot__controls">
+        <button type="button" (click)="pick(); $event.stopPropagation()">Substituir</button>
+        <button type="button" (click)="remove($event)">Remover</button>
+      </div>
+    }
+  } @else {
+    <div class="image-slot__empty">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <span>{{ placeholder() }}</span>
+    </div>
+  }
+  <input #fileInput type="file" accept="image/png,image/jpeg,image/webp,image/avif" style="display:none" (change)="onFileChange($event)" />
+</div>

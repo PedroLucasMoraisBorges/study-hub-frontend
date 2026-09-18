@@ -1,3 +1,56 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap');
+
+:root {
+  --ink: #241f1c;
+  --bg: #f6f3ec;
+  --divider: rgba(36, 31, 28, .14);
+  --accent: #2f6f4f;
+  --accent-ink: #1f4a34;
+  --accent-soft: #dcebe2;
+  --amber: #c9822a;
+  --amber-ink: #7a4a12;
+  --amber-soft: #f6ead6;
+  --blue: #3a5aab;
+  --blue-ink: #1f3a66;
+  --blue-soft: #dde6f5;
+  --rose: #a13d63;
+  --rose-ink: #6f1f3f;
+  --rose-soft: #f5dde6;
+  --violet: #6a4ba1;
+  --violet-ink: #42306b;
+  --violet-soft: #e7e0f5;
+  --teal: #2a8a82;
+  --teal-ink: #175650;
+  --teal-soft: #d9ede9;
+  --coral: #c15b3f;
+  --coral-ink: #7a3521;
+  --coral-soft: #f5e0d8;
+  --slate: #556273;
+  --slate-ink: #2f3945;
+  --slate-soft: #e2e6ea;
+  --shadow: 0 6px 20px rgba(36, 31, 28, .08);
+  --shadow-lg: 0 16px 40px rgba(36, 31, 28, .18);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  font-family: 'Archivo', sans-serif;
+  color: var(--ink);
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+textarea, input {
+  font-family: inherit;
+}

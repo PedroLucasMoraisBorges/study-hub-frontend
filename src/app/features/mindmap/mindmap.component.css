@@ -1,0 +1,29 @@
+:host {
+  display: contents;
+}
+
+.mm-canvas {
+  flex: 1;
+  position: relative;
+  background: radial-gradient(#e9e4d5 1px, transparent 1px) 0 0/18px 18px, var(--bg);
+  overflow: hidden;
+}
+
+.mm-node-wrap {
+  position: absolute;
+  --btns: 0;
+  pointer-events: none;
+}
+
+.mm-node-wrap:hover {
+  --btns: 1;
+}
+
+.mm-node-btn {
+  pointer-events: auto;
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--accent);
+}

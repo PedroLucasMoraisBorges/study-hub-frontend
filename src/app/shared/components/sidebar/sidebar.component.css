@@ -1,0 +1,11 @@
+:host {
+  display: contents;
+}
+
+.sidebar-topic-link {
+  --btns: 0;
+}
+
+.sidebar-topic-link:hover {
+  --btns: 1;
+}
